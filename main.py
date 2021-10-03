@@ -13,11 +13,13 @@ pygame.init()
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 255, 0)
-YELLOW = (255, 255, 0)
-YELLOW_HOV = (241, 250, 75)
+BTN = (82, 183, 233)
+BTN_HOV = (24, 157, 228)
 WHITE = (255, 255, 255)
+MAIN = (119, 114, 226)
 BLACK = (0, 0, 0)
-PURPLE = (128, 0, 128)
+GRIDLINE = (36, 36, 68)
+GRIDLINETHIN = (70, 100, 140)
 ORANGE = (255, 165 ,0)
 GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
@@ -25,7 +27,7 @@ TURQUOISE = (64, 224, 208)
 # Classes:
 class Cell:
     def __init__(self, row, col, num):
-        self.color = BLACK
+        self.color = MAIN
         self.num = num
         self.gap = WIDTH // ROWS
         self.x = col * self.gap + MENU
@@ -39,7 +41,7 @@ class Cell:
 
 
     def switch_color(self):
-        if self.color == BLACK:
+        if self.color == MAIN:
             self.color = GREEN
         else:
             self.color = GREEN
@@ -74,14 +76,14 @@ class Menu:
         self.x = MENU
         self.y = WIDTH
         self.bgColor = GREY
-        self.btnColor = YELLOW
+        self.btnColor = BTN
         self.start = Button(self.btnColor,30, 100,140,80,'Start')
         self.custom = Button(self.btnColor,self.start.x, self.start.y + 100, 140,80,'Custom')
         self.exit = Button(self.btnColor,self.custom.x, self.custom.y + 100, 140,80,'Exit')
     
     def draw(self):
         font = pygame.font.SysFont('comicsans',80)
-        text = font.render('MENU',True,BLACK)
+        text = font.render('MENU',True,MAIN)
         WIN.blit(text,(20,20,100,100))
         self.start.draw(WIN,BLACK)
         self.custom.draw(WIN, BLACK)
@@ -89,17 +91,17 @@ class Menu:
 
     def checkHover(self, pos):
         if (self.start.is_over(pos)):
-            self.start.color = YELLOW_HOV
+            self.start.color = BTN_HOV
         else:
             self.start.color = self.btnColor
         
         if (self.custom.is_over(pos)):
-            self.custom.color = YELLOW_HOV
+            self.custom.color = BTN_HOV
         else:
             self.custom.color = self.btnColor
         
         if (self.exit.is_over(pos)):
-            self.exit.color = YELLOW_HOV
+            self.exit.color = BTN_HOV
         else:
             self.exit.color = self.btnColor
     
@@ -116,14 +118,15 @@ class Menu:
         return customInput()
 
 # Input Handling:
-def drawBoardInput(board, current_pos):
+def drawBoardInput(board, current_pos, btn):
     # Draw Title
     WIN.fill(WHITE)
     font = pygame.font.SysFont('comicsans', 40)
-    text = font.render("Custom Mode", True, BLACK)
+    text = font.render("Custom Mode", True, MAIN)
     WIN.blit(text, (5,100))
     
-    
+    # Draw Button
+    btn.draw(WIN, BLACK)
     # Draw Gridlines:
     draw_gridlines()
 
@@ -152,12 +155,18 @@ def customInput():
     ]
     board = make_board(num)
     current = (0,0)
+    enter = Button(BTN, 10,200, 180,80,'ENTER')
     while(run):
-        drawBoardInput(board, current)
+        m_pos = pygame.mouse.get_pos()
+        drawBoardInput(board, current, enter)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if enter.is_over(m_pos):
+                enter.color = BTN_HOV
+            else:
+                enter.color = BTN
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT: # LEFT
                     if (current[1] > 0):
@@ -202,7 +211,10 @@ def customInput():
                     board[current[0]][current[1]] = Cell(current[0],current[1], 0)
                 elif event.key == pygame.K_SPACE:
                     return num, board
-
+            if pygame.mouse.get_pressed()[0]:
+                m_pos = pygame.mouse.get_pos()
+                if (enter.is_over(m_pos)):
+                    return num,board
 # Solve Utilities: 
 def solve(num,bo, menu):
     find = find_empty(num)
@@ -274,14 +286,14 @@ def draw_gridlines():
     gap = WIDTH // ROWS
     for i in range(ROWS + 1):
         if i % 3 ==0:
-            pygame.draw.line(WIN, PURPLE, (MENU, i * gap), (WIDTH + MENU, i * gap),5)
+            pygame.draw.line(WIN, GRIDLINE, (MENU, i * gap), (WIDTH + MENU, i * gap),4)
         else:
-            pygame.draw.line(WIN, BLACK, (MENU, i * gap), (WIDTH + MENU, i * gap),2)
+            pygame.draw.line(WIN, GRIDLINETHIN, (MENU, i * gap), (WIDTH + MENU, i * gap),3)
         for j in range(ROWS + 1):
             if j % 3 ==0:
-                pygame.draw.line(WIN, PURPLE, (j * gap + MENU, 0), (j * gap + MENU, WIDTH),5)
+                pygame.draw.line(WIN, GRIDLINE, (j * gap + MENU, 0), (j * gap + MENU, WIDTH),4)
             else:
-                pygame.draw.line(WIN, BLACK, (j*gap + MENU, 0), (j*gap + MENU, WIDTH),2)
+                pygame.draw.line(WIN, GRIDLINETHIN, (j*gap + MENU, 0), (j*gap + MENU, WIDTH),3)
 
 def draw(board, menu):
     WIN.fill(WHITE)
